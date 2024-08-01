@@ -203,6 +203,8 @@ public:
  * Uses the default generator defined in the random C++11 library
  */
 class Generator {
+    //! Platform specific RNG that generates the seed of the Mersenne Twister 64-bit
+    random_device rd;
 
     //! Mersenne Twister 64-bit random generator
     mt19937_64 mersenne;
@@ -238,22 +240,30 @@ class Generator {
     /*!
      * Initialises a Random Generator Descriptor with data from a configuration object
      *\param from the Google Protocol Buffer configuration object
+     *\param seed seed for the Mersenne Twist 64-bit
      */
-    void init(const RandomDesc&);
+    void init(const RandomDesc&, const uint64_t = 0);
 
     /*!
      * Initialises a Random Generator Descriptor with a base and a range value
      *\param t random distribution type
      *\param base minimum value
      *\param range max deviation from min value (max=base+range)
+     *\param seed seed for the Mersenne Twist 64-bit
      */
-    void init(const RandomDesc::Type, const uint64_t, const uint64_t);
+    void init(const RandomDesc::Type, const uint64_t, const uint64_t, const uint64_t = 0);
 
     /*!
      * Gets a new value from the configured distribution
      *\return a randomly extracted unsigned integer value
      */
     uint64_t get();
+
+    /*!
+     * Gets the seed value
+     *\return the seed of the Mersenne Twist
+     */
+    uint64_t getSeed();
 
     /*!
      * Returns the configured random generator type

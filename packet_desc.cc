@@ -45,7 +45,7 @@ void PacketDesc::init(const uint64_t parentId,
     if (from.has_wait_for()) {
         waitFor = from.wait_for();
     }
-
+    
     if (from.has_size()) {
         sizeType = CONFIGURED;
         size = from.size();
@@ -55,7 +55,13 @@ void PacketDesc::init(const uint64_t parentId,
     }
     else if (from.has_random_size()){
         sizeType = RANDOM;
-        randomSize.init(from.random_size());
+        if(from.random_size().has_seed()){
+            randomSize.init(from.random_size(), from.random_size().seed());
+        }
+        else{
+            randomSize.init(from.random_size());
+        }
+        printf("* ATP-Engine size generator seed: %ld\n",randomSize.getSeed());
     }
     else {
         LOG("PacketDesc::init index", tpId,
@@ -92,12 +98,20 @@ void PacketDesc::init(const uint64_t parentId,
     if (from.has_random_address()) {
         LOG("PacketDesc::init", tpId,  "address is RANDOM");
         addressType = RANDOM;
-        if (from.has_address())
-        {   // todo support start?
+        // If random address has been setup and seed has been specified force the seed
+        if(from.random_address().has_seed() && from.has_address()) { 
+            uint64_t seed = from.random_address().seed();
+            randomAddress.init(from.random_address().type(), base, range, seed);
+        } if(from.random_address().has_seed()){
+            uint64_t seed = from.random_address().seed();
+            randomAddress.init(from.random_address(), seed);
+        } if (from.has_address()) {   
+            // todo support start?
             randomAddress.init(from.random_address().type(), base, range);
         } else {
             randomAddress.init(from.random_address());
         }
+        printf("* ATP-Engine address generator seed: %ld\n",randomAddress.getSeed());
     } else {
         LOG("PacketDesc::init", tpId,  "address is CONFIGURED");
         addressType = CONFIGURED;

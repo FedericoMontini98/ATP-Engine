@@ -20,7 +20,8 @@ Generator::Generator(const uint64_t s):
         type(RandomDesc::UNIFORM),
         distribution(nullptr),
         seed(s) {
-    mersenne.seed(seed);
+    this->seed = rd();
+    mersenne.seed(this->seed);
 }
 
 Generator::~Generator() {
@@ -28,7 +29,13 @@ Generator::~Generator() {
 }
 
 void Generator::init(const RandomDesc::Type t,
-        const uint64_t base, const uint64_t range) {
+        const uint64_t base, const uint64_t range, const uint64_t seed) {
+    // specified seed setup   
+    if(seed != 0){
+        mersenne.seed(seed);
+        this->seed = seed;
+    }
+
     // clean previously allocated generators
     delete distribution;
     // set new type
@@ -62,10 +69,16 @@ void Generator::init(const RandomDesc::Type t,
     initialized = true;
 }
 
-void Generator::init(const RandomDesc& from) {
+void Generator::init(const RandomDesc& from, const uint64_t seed) {
 
     // clean previously allocated generators
     delete distribution;
+    
+    // specified seed setup
+    if(seed != 0){
+        mersenne.seed(seed);
+        this->seed = seed;
+    }
 
     type = from.type();
 
@@ -103,6 +116,17 @@ uint64_t Generator::get() {
         LOG("Generator::get generated",RandomDesc::Type_Name(type),"value", ret);
     } else {
         ERROR("RandomGenerator::get uninitialised");
+    }
+    return ret;
+}
+
+uint64_t Generator::getSeed() {
+    uint64_t ret = 0;
+    if(initialized){
+        ret = this->seed;
+        LOG("Generator::getSeed generated",ret,"value");
+    } else {
+        ERROR("RandomGenerator::getSeed uninitialised");
     }
     return ret;
 }
