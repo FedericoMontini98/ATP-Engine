@@ -55,7 +55,7 @@ message RandomDesc {
     optional WeibullDesc weibull_desc = 12;
 
     // Force seed on Mersenne-Twist 64bit
-    optional uint64 seed = 13 [default = 0];
+    optional uint64 seed = 13;
 
 }
 

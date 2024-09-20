@@ -45,7 +45,7 @@ void PacketDesc::init(const uint64_t parentId,
     if (from.has_wait_for()) {
         waitFor = from.wait_for();
     }
-    
+
     if (from.has_size()) {
         sizeType = CONFIGURED;
         size = from.size();
@@ -61,7 +61,7 @@ void PacketDesc::init(const uint64_t parentId,
         else{
             randomSize.init(from.random_size());
         }
-        printf("* ATP-Engine size generator seed: %ld\n",randomSize.getSeed());
+        LOG("PacketDesc::init size generator seed",randomSize.getSeed());
     }
     else {
         LOG("PacketDesc::init index", tpId,
@@ -111,7 +111,7 @@ void PacketDesc::init(const uint64_t parentId,
         } else {
             randomAddress.init(from.random_address());
         }
-        printf("* ATP-Engine address generator seed: %ld\n",randomAddress.getSeed());
+        LOG("PacketDesc::init address generator seed",randomAddress.getSeed());
     } else {
         LOG("PacketDesc::init", tpId,  "address is CONFIGURED");
         addressType = CONFIGURED;
