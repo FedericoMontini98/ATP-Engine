@@ -14,12 +14,29 @@
 #include "proto/tp_config.pb.h"
 
 #include <random>
+#include <sstream>
 
 using namespace std;
 
 namespace TrafficProfiles {
 
 namespace Random {
+
+// Define a structure to hold the range
+struct Range {
+    int start;
+    int end;
+};
+// Define a structure to hold the interval of values as long as the probability of falling into that specific interval
+struct Interval {
+    uint64_t start;
+    uint64_t end;
+};
+// Store distribution data for Custom distributions
+struct DistributionData {
+    std::vector<Interval> intervals;
+    std::vector<double> probabilities;
+};
 
 //! forward declaration
 class Generator;
@@ -195,6 +212,27 @@ public:
 };
 
 
+/*!
+ * Random Custom Distribution
+ */
+class Custom: public Distribution {
+    //! Custom distribution
+    DistributionData distribution;
+    //! File containing the PMF of the distribution
+    string file_path;
+public:
+   /*!
+    * Distribution specific constructor
+    *\param gen pointer to the generator container object
+    *\param desc protobuf distribution descriptor
+    */
+    Custom(Generator* const gen, const RandomDesc& desc);
+   /*!
+    * Gets a new value from the distribution
+    *\return a randomly extracted unsigned integer value
+    */
+    uint64_t get();
+};
 
 /*!
  *\brief Random Numbers generator class
@@ -226,6 +264,7 @@ class Generator {
     friend class Normal;
     friend class Poisson;
     friend class Weibull;
+    friend class Custom;
 
   public:
 

@@ -100,6 +100,10 @@ void Generator::init(const RandomDesc& from, const uint64_t seed) {
             distribution = new Weibull(this, from);
             break;
         }
+        case RandomDesc::CUSTOM: {
+            distribution = new Custom(this, from);
+            break;
+        }
         default:
             ERROR("Generator::init unknown random generator type", RandomDesc::Type_Name(type));
             break;
@@ -193,6 +197,43 @@ Weibull::Weibull(Generator* const gen, const RandomDesc& from):
 
 uint64_t Weibull::get() {
     return (*weibull)(generator->mersenne);
+}
+
+Custom::Custom(Generator* const gen, const RandomDesc& from):
+        Distribution(gen){
+    // read distribution file
+    ifstream file(from.custom_desc().file_path());
+    string line;
+    double prob_sum = 0;
+    // define an error margin acceptable for the sum of probabilities
+    const double error = 1e-9;
+    // read each line from the file until the end of the file is reached
+    while (std::getline(file, line)) {
+        istringstream iss(line);
+        string key;
+        double value;
+        // extract the interval string (key) and the probability value (value) from the string stream
+        if (std::getline(iss >> std::ws, key, ':') && iss >> value) {
+            uint64_t start, end;
+            sscanf(key.c_str(), "\"%ld-%ld\"", &start, &end);
+            // create an Interval struct with the parsed start, end, and probability values and adds it to the distribution vector
+            distribution.intervals.push_back({start,end});
+            distribution.probabilities.push_back(value);
+            prob_sum += value;
+        }
+    }
+    // check if the sum of probabilities is 1, using a small error margin caused by casting
+    if (std::abs(prob_sum - 1.0) > error) {
+        ERROR("Custom::Custom the sum of all probabilities is not equal to 1:", prob_sum);
+    }
+}
+uint64_t Custom::get() {
+    // use the discrete distribution d to randomly select an index based on the probabilities
+    std::discrete_distribution<> d(distribution.probabilities.begin(), distribution.probabilities.end());
+    const Interval& chosen_interval = distribution.intervals[d(generator->mersenne)];
+    // creates a uniform real distribution object uniform_dist that generates random numbers uniformly within the interval
+    uniform_int_distribution<uint64_t>* uniform = new uniform_int_distribution<uint64_t>(chosen_interval.start,chosen_interval.end);
+    return (*uniform)(generator->mersenne);
 }
 
 }

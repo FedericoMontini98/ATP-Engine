@@ -19,6 +19,7 @@ message RandomDesc {
         NORMAL = 1;
         POISSON = 2;
         WEIBULL = 3;
+        CUSTOM=4;
     }
     // Uniform random number generator, it is configured by providing interval boundaries
     message UniformDesc {
@@ -42,20 +43,27 @@ message RandomDesc {
         required uint64 shape = 6;
         required uint64 scale = 7;
     }
+
+    // Customizable distrbution random number generator, it is configured by providing the path of a JSON
+    message CustomDesc{
+        required string file_path = 8;
+    }
     // Random number generator type
-    required Type type = 8;
+    required Type type = 9;
 
     // uniform random number descriptor
-    optional UniformDesc uniform_desc = 9;
+    optional UniformDesc uniform_desc = 10;
     // normal random number descriptor
-    optional NormalDesc normal_desc = 10;
+    optional NormalDesc normal_desc = 11;
     // Poisson random number descriptor
-    optional PoissonDesc poisson_desc = 11;
+    optional PoissonDesc poisson_desc = 12;
     // Weibull random number descriptor
-    optional WeibullDesc weibull_desc = 12;
+    optional WeibullDesc weibull_desc = 13;
+    // Custom random number descriptor
+    optional CustomDesc custom_desc = 14;
 
     // Force seed on Mersenne-Twist 64bit
-    optional uint64 seed = 13;
+    optional uint64 seed = 15;
 
 }
 
